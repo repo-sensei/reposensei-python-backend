@@ -21,7 +21,7 @@ Verify installation:
 ```bash
 python --version
 pip --version
-
+```
 After cloning the repository - 
 
 1. Create and Activate a Virtual Environment
