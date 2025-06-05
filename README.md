@@ -24,20 +24,30 @@ pip --version
 ```
 After cloning the repository - 
 
-1. Create and Activate a Virtual Environment
+### 1. Create and Activate a Virtual Environment
 
-# On Windows
+On Windows
+
+```bash
 python -m venv venv
 venv\Scripts\activate
+```
 
-# On macOS/Linux
+On macOS/Linux
+
+```bash
 python3 -m venv venv
 source venv/bin/activate
+```
 
-2. Install Dependencies
+### 2. Install Dependencies
 
+```bash
 pip install -r requirements.txt
+```
 
-3. Run the Python Server
+### 3. Run the Python Server
 
+```bash
 uvicorn app.main:app --host 0.0.0.0 --port 5005
+```
