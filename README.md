@@ -45,9 +45,19 @@ source venv/bin/activate
 ```bash
 pip install -r requirements.txt
 ```
+### 3. Setup OpenAI API - Run this in terminal
 
-### 3. Run the Python Server
+Link for your own GitHub Token for OpenAI
+[https://github.com/marketplace/models](https://github.com/marketplace/models)
+
+```bash
+$Env:GITHUB_TOKEN="<your-github-token>"
+```
+
+### 4. Run the Python Server
 
 ```bash
 uvicorn app.main:app --host 0.0.0.0 --port 5005
 ```
+
+
