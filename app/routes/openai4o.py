@@ -5,22 +5,22 @@ from openai import OpenAI
 
 router = APIRouter()
 
-# ✅ Using GitHub AI Inference Endpoint
+# Using GitHub AI Inference Endpoint
 token = os.environ["GITHUB_TOKEN"]
 endpoint = "https://models.github.ai/inference"
 model_name = "openai/gpt-4o"
 
-# ✅ OpenAI client setup with GitHub proxy
+# OpenAI client setup with GitHub proxy
 client = OpenAI(
     base_url=endpoint,
     api_key=token,
 )
 
-# ✅ Input schemas
+# Input schemas
 class PromptRequest(BaseModel):
     prompt: str
 
-# ✅ Existing endpoint
+# Existing endpoint
 @router.post("/generate-architecture")
 async def generate_architecture(req: PromptRequest):
     try:
