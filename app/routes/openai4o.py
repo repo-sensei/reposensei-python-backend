@@ -39,4 +39,20 @@ async def generate_architecture(req: PromptRequest):
         return {"success": False, "error": str(e)}
 
 
+@router.post("/onboard")
+async def generate_summary(req: PromptRequest):
+    try:
+        response = client.chat.completions.create(
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant. Answer clearly and concisely."},
+                {"role": "user", "content": req.prompt},
+            ],
+            temperature=0.7,
+            top_p=1.0,
+            max_tokens=800,
+            model=model_name,
+        )
+        return {"success": True, "summary": response.choices[0].message.content}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
 
