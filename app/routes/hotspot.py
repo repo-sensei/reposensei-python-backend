@@ -29,13 +29,19 @@ async def analyze(req: AnalyzePrompt):
             ],
             temperature=0.7,
             top_p=1.0,
-            max_tokens=400,
+            max_tokens=800,
             model=model_name,
         )
+
+        content = ""
+        if response.choices and response.choices[0].message and response.choices[0].message.content:
+            content = response.choices[0].message.content.strip()
+
         return {
             "success": True,
-            "suggestions": response.choices[0].message.content.strip()
+            "suggestions": content or "No meaningful content returned."
         }
+
     except Exception as e:
         return {
             "success": False,

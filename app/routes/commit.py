@@ -30,7 +30,7 @@ async def summarize(req: PromptRequest):
             ],
             temperature=0.7,
             top_p=1.0,
-            max_tokens=1200,
+            max_tokens=800,
             model=model_name,
         )
         return {"success": True, "summary": response.choices[0].message.content}
