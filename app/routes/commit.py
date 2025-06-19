@@ -8,7 +8,7 @@ router = APIRouter()
 # Using GitHub AI Inference Endpoint
 token = os.environ["GITHUB_TOKEN"]
 endpoint = "https://models.github.ai/inference"
-model_name = "openai/gpt-4o"
+model_name = "openai/gpt-4o-mini"
 
 # OpenAI client setup with GitHub proxy
 client = OpenAI(
