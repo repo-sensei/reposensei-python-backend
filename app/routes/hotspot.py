@@ -1,19 +1,12 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
-from openai import OpenAI
-import os
+import requests
 
 router = APIRouter()
 
-# GitHub AI Inference Setup
-token = os.environ["GITHUB_TOKEN"]
-endpoint = "https://models.github.ai/inference"
-model_name = "openai/gpt-4o-mini"
-
-client = OpenAI(
-    base_url=endpoint,
-    api_key=token,
-)
+# Local Ollama endpoint
+OLLAMA_URL = "http://ollama:11434"
+MODEL_NAME = "deepseek-r1:latest"
 
 class AnalyzePrompt(BaseModel):
     prompt: str
@@ -21,21 +14,25 @@ class AnalyzePrompt(BaseModel):
 @router.post("/analyze")
 async def analyze(req: AnalyzePrompt):
     try:
-        response = client.chat.completions.create(
-            
-            messages=[
-                {"role": "system", "content": "You are a code analysis expert. Analyze the code and suggest improvements."},
-                {"role": "user", "content": req.prompt}
-            ],
-            temperature=0.7,
-            top_p=1.0,
-            max_tokens=800,
-            model=model_name,
+        full_prompt = (
+            "You are a code analysis expert. Analyze the following code and suggest improvements:\n\n"
+            f"{req.prompt}"
         )
 
-        content = ""
-        if response.choices and response.choices[0].message and response.choices[0].message.content:
-            content = response.choices[0].message.content.strip()
+        response = requests.post(
+            f"{OLLAMA_URL}/api/generate",
+            json={
+                "model": MODEL_NAME,
+                "prompt": full_prompt,
+                "temperature": 0.7,
+                "top_p": 1.0,
+                "max_tokens": 800
+            }
+        )
+
+        response.raise_for_status()
+        result = response.json()
+        content = result.get("response", "").strip()
 
         return {
             "success": True,
