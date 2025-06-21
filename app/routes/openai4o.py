@@ -1,67 +1,57 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
-import requests
+import os
+from openai import OpenAI
 
 router = APIRouter()
 
-# Ollama local model config
-OLLAMA_URL = "http://ollama:11434"
-MODEL_NAME = "deepseek-r1:latest"
+# Using GitHub AI Inference Endpoint
+token = os.environ["GITHUB_TOKEN"]
+endpoint = "https://models.github.ai/inference"
+model_name = "openai/gpt-4o"
 
-# Input schema
+# OpenAI client setup with GitHub proxy
+client = OpenAI(
+    base_url=endpoint,
+    api_key=token,
+)
+
+# Input schemas
 class PromptRequest(BaseModel):
     prompt: str
 
-# /generate-architecture endpoint
+# Existing endpoint
 @router.post("/generate-architecture")
 async def generate_architecture(req: PromptRequest):
     try:
-        full_prompt = (
-            "You are a helpful assistant. Generate a system architecture based on the following input:\n\n"
-            f"{req.prompt}"
+        response = client.chat.completions.create(
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": req.prompt},
+            ],
+            temperature=1.0,
+            top_p=1.0,
+            max_tokens=1000,
+            model=model_name,
         )
-
-        response = requests.post(
-            f"{OLLAMA_URL}/api/generate",
-            json={
-                "model": MODEL_NAME,
-                "prompt": full_prompt,
-                "temperature": 1.0,
-                "top_p": 1.0,
-                "max_tokens": 1000,
-            }
-        )
-
-        response.raise_for_status()
-        result = response.json()
-        return {"success": True, "response": result.get("response", "").strip()}
-
+        return {"success": True, "response": response.choices[0].message.content}
     except Exception as e:
         return {"success": False, "error": str(e)}
 
-# /onboard endpoint
+
 @router.post("/onboard")
 async def generate_summary(req: PromptRequest):
     try:
-        full_prompt = (
-            "You are a helpful assistant. Answer clearly and concisely based on the following onboarding content:\n\n"
-            f"{req.prompt}"
+        response = client.chat.completions.create(
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant. Answer clearly and concisely."},
+                {"role": "user", "content": req.prompt},
+            ],
+            temperature=0.7,
+            top_p=1.0,
+            max_tokens=800,
+            model=model_name,
         )
-
-        response = requests.post(
-            f"{OLLAMA_URL}/api/generate",
-            json={
-                "model": MODEL_NAME,
-                "prompt": full_prompt,
-                "temperature": 0.7,
-                "top_p": 1.0,
-                "max_tokens": 800,
-            }
-        )
-
-        response.raise_for_status()
-        result = response.json()
-        return {"success": True, "summary": result.get("response", "").strip()}
-
+        return {"success": True, "summary": response.choices[0].message.content}
     except Exception as e:
         return {"success": False, "error": str(e)}
