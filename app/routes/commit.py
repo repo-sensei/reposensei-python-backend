@@ -1,40 +1,38 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
-import requests
+import os
+from openai import OpenAI
 
 router = APIRouter()
 
-# Ollama local config
-OLLAMA_URL = "http://ollama:11434"
-MODEL_NAME = "deepseek-r1:latest"
+# Using GitHub AI Inference Endpoint
+token = os.environ["GITHUB_TOKEN"]
+endpoint = "https://models.github.ai/inference"
+model_name = "openai/gpt-4o-mini"
+
+# OpenAI client setup with GitHub proxy
+client = OpenAI(
+    base_url=endpoint,
+    api_key=token,
+)
 
 class PromptRequest(BaseModel):
     prompt: str
 
 @router.post("/summarize")
 async def summarize(req: PromptRequest):
+    
     try:
-        full_prompt = (
-            "You are a helpful assistant. Summarize the following content clearly and concisely:\n\n"
-            f"{req.prompt}"
+        response = client.chat.completions.create(
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": req.prompt},
+            ],
+            temperature=0.7,
+            top_p=1.0,
+            max_tokens=800,
+            model=model_name,
         )
-
-        response = requests.post(
-            f"{OLLAMA_URL}/api/generate",
-            json={
-                "model": MODEL_NAME,
-                "prompt": full_prompt,
-                "temperature": 0.7,
-                "top_p": 1.0,
-                "max_tokens": 800,
-            }
-        )
-
-        response.raise_for_status()
-        result = response.json()
-        summary = result.get("response", "").strip()
-
-        return {"success": True, "summary": summary}
-
+        return {"success": True, "summary": response.choices[0].message.content}
     except Exception as e:
         return {"success": False, "error": str(e)}
