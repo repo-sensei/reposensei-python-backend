@@ -5,8 +5,10 @@ from openai import OpenAI
 
 router = APIRouter()
 
-# Using GitHub AI Inference Endpoint
-token = os.environ["GITHUB_TOKEN"]
+# Read secrets from files
+with open(os.environ['SUPABASE_URL_FILE']) as f: url = f.read().strip()
+with open(os.environ['GITHUB_TOKEN_FILE']) as f: token = f.read().strip()
+
 endpoint = "https://models.github.ai/inference"
 model_name = "openai/gpt-4o-mini"
 
@@ -21,6 +23,9 @@ class PromptRequest(BaseModel):
 
 @router.post("/summarize")
 async def summarize(req: PromptRequest):
+    
+    if not token:
+        return {"success": False, "error": "GITHUB_TOKEN not set"}
     
     try:
         response = client.chat.completions.create(
