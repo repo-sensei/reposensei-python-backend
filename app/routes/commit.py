@@ -5,9 +5,8 @@ from openai import OpenAI
 
 router = APIRouter()
 
-# Read secrets from files
-with open(os.environ['SUPABASE_URL_FILE']) as f: url = f.read().strip()
-with open(os.environ['GITHUB_TOKEN_FILE']) as f: token = f.read().strip()
+# Read secrets from environment variables
+token = os.environ["GITHUB_TOKEN"]
 
 endpoint = "https://models.github.ai/inference"
 model_name = "openai/gpt-4o-mini"
